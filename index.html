@@ -100,7 +100,7 @@
       chatBox.scrollTop = chatBox.scrollHeight;
 
       try {
-        const res = await fetch("http://localhost:1337/v1/chat/completions", {
+        const res = await fetch("https://customgptwithjan-ai.onrender.com", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
