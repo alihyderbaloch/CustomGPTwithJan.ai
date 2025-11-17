@@ -1,125 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Custom GPT — Jan (Local)</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      margin-bottom: 15px;
-    }
-    #chat-box {
-      background: #fff;
-      width: 95%;
-      max-width: 700px;
-      height: 70vh;
-      border-radius: 10px;
-      padding: 15px;
-      overflow-y: auto;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    .message {
-      margin-bottom: 12px;
-      padding: 10px;
-      border-radius: 8px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-    .user {
-      background: #d1e7ff;
-      text-align: right;
-    }
-    .bot {
-      background: #e8f5e9;
-    }
-    #input-area {
-      display: flex;
-      width: 95%;
-      max-width: 700px;
-      margin-top: 15px;
-    }
-    textarea {
-      flex: 1;
-      height: 60px;
-      padding: 10px;
-      font-size: 16px;
-      resize: none;
-      border-radius: 10px;
-    }
-    button {
-      margin-left: 10px;
-      padding: 10px 20px;
-      border: none;
-      background: #007bff;
-      color: white;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-  </style>
+    <title>My Noob GPT Chat</title>
 </head>
-<body>
-  <h1>My Custom GPT </h1>
+<body style="background: #fffae6; font-family: Arial; text-align:center;">
 
-  <div id="chat-box"></div>
+    <h1>NOOB GPT CHAT</h1>
 
-  <div id="input-area">
-    <textarea id="prompt" placeholder="Ask something..."></textarea>
-    <button onclick="sendPrompt()">Send</button>
-  </div>
+    <div id="chat-box" style="width: 90%; max-width: 600px; margin: auto; height: 400px; overflow-y: auto; background: #fff; border: 2px solid #000; padding: 10px;">
+    </div>
 
-  <script>
-    async function sendPrompt() {
-      const prompt = document.getElementById("prompt").value.trim();
-      if (!prompt) return;
+    <textarea id="prompt" placeholder="Type message here..." style="width: 90%; height: 50px; margin-top: 10px;"></textarea>
+    <br>
+    <button onclick="sendPrompt()" style="margin-top:10px; padding: 10px 20px; font-size:16px;">Send</button>
 
-      const chatBox = document.getElementById("chat-box");
-      const userMsg = document.createElement("div");
-      userMsg.className = "message user";
-      userMsg.textContent = prompt;
-      chatBox.appendChild(userMsg);
-      document.getElementById("prompt").value = "";
+    <script>
+        async function sendPrompt() {
+            const prompt = document.getElementById("prompt").value.trim();
+            if (!prompt) return;
 
-      const botMsg = document.createElement("div");
-      botMsg.className = "message bot";
-      botMsg.textContent = "Thinking...";
-      chatBox.appendChild(botMsg);
-      chatBox.scrollTop = chatBox.scrollHeight;
+            const chatBox = document.getElementById("chat-box");
 
-      try {
-        const res = await fetch("https://customgptwithjan-ai.onrender.com", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer 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" // 👈 replace with your real API key
-          },
-          body: JSON.stringify({
-            model: "Phi-3_5-mini-instruct_IQ4_XS",
-            messages: [{ role: "user", content: prompt }]
-          })
-        });
+            // Show user message
+            const userDiv = document.createElement("div");
+            userDiv.textContent = "You: " + prompt;
+            userDiv.style.background = "#cceeff";
+            userDiv.style.margin = "5px";
+            userDiv.style.padding = "5px";
+            chatBox.appendChild(userDiv);
 
-        const data = await res.json();
-        botMsg.textContent =
-          data.choices?.[0]?.message?.content || "No response received.";
-      } catch (err) {
-        botMsg.textContent = "Error: " + err.message;
-      }
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-  </script>
+            document.getElementById("prompt").value = "";
+
+            // Show bot thinking
+            const botDiv = document.createElement("div");
+            botDiv.textContent = "GPT: thinking...";
+            botDiv.style.background = "#ddffdd";
+            botDiv.style.margin = "5px";
+            botDiv.style.padding = "5px";
+            chatBox.appendChild(botDiv);
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const res = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({message: prompt})
+                });
+
+                let data;
+                try {
+                    data = await res.json();
+                } catch (err) {
+                    data = {choices: [{message: {content: "Error: Invalid JSON response"}}]};
+                }
+
+                const reply = data.choices?.[0]?.message?.content || data.error || "No response";
+                botDiv.textContent = "GPT: " + reply;
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (err) {
+                botDiv.textContent = "GPT: Error fetching response";
+            }
+        }
+    </script>
 </body>
 </html>
