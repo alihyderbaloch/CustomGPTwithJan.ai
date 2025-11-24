@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify, send_from_directory
 import requests
+import os
 
 app = Flask(__name__, static_folder=".")
 
-# Replace this with your actual Jan.ai API key
-API_KEY = "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"
+# Get API key from Render environment variables
+API_KEY = os.environ.get("JANAI_API_KEY")
 
 @app.route("/")
 def home():
@@ -16,9 +17,8 @@ def chat():
     prompt = data.get("message", "")
 
     try:
-        # Use the live API endpoint instead of localhost
         response = requests.post(
-            "https://api.jan.ai/v1/chat/completions",  # Correct live URL
+            "https://api.jan.ai/v1/chat/completions",  # Live API URL
             headers={
                 "Authorization": f"Bearer {API_KEY}",
                 "Content-Type": "application/json"
@@ -27,7 +27,7 @@ def chat():
                 "model": "Phi-3_5-mini-instruct_IQ4_XS",
                 "messages": [{"role": "user", "content": prompt}]
             },
-            timeout=30  # optional, to avoid hanging requests
+            timeout=30
         )
         return jsonify(response.json())
     except Exception as e:
